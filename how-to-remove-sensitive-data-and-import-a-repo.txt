@@ -3,9 +3,12 @@ How to remove sensitive data and import a repo:
 2. cd to the repository
 3. git filter-branch --force --index-filter "git rm --cached --ignore-unmatch <PATH TO FILE with sensitive data>" --prune-empty --tag-name-filter cat -- --all
 4. Create an empty repository in azuredevops and get the link to this target repo.
-5. Push the repository with secreats removed to the target-repo:
+5. Push the repository with secrets removed to the target-repo:
     git push --mirror <target-repo>
 
 References:
-Removing sensitive data from a repository - GitHub Docs
-Import a Git repo into your project - Azure Repos | Microsoft Docs
+- Removing sensitive data from a repository
+https://docs.github.com/en/github/authenticating-to-github/removing-sensitive-data-from-a-repository
+
+- Import a Git repo into your project
+https://docs.microsoft.com/en-us/azure/devops/repos/git/import-git-repository?view=azure-devops#manually-import-a-repo
