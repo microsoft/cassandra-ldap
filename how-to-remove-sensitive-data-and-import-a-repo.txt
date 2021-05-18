@@ -1,0 +1,11 @@
+How to remove sensitive data and import a repo:
+1. git clone your remote repository. For example, https://github.com/instaclustr/cassandra-ldap.git
+2. cd to the repository
+3. git filter-branch --force --index-filter "git rm --cached --ignore-unmatch <PATH TO FILE with sensitive data>" --prune-empty --tag-name-filter cat -- --all
+4. Create an empty repository in azuredevops and get the link to this target repo.
+5. Push the repository with secreats removed to the target-repo:
+    git push --mirror <target-repo>
+
+References:
+Removing sensitive data from a repository - GitHub Docs
+Import a Git repo into your project - Azure Repos | Microsoft Docs
