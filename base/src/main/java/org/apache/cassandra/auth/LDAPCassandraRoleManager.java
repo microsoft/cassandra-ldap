@@ -29,13 +29,20 @@ import java.util.StringJoiner;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
+import com.azure.identity.ManagedIdentityCredential;
+import com.azure.identity.ManagedIdentityCredentialBuilder;
+import com.azure.security.keyvault.secrets.SecretClient;
+import com.azure.security.keyvault.secrets.SecretClientBuilder;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.instaclustr.cassandra.ldap.AbstractLDAPAuthenticator;
 import com.instaclustr.cassandra.ldap.auth.SystemAuthRoles;
 import com.instaclustr.cassandra.ldap.conf.LdapAuthenticatorConfiguration;
+import com.instaclustr.cassandra.ldap.utils.SecretUtils;
 import com.instaclustr.cassandra.ldap.utils.ServiceUtils;
+import com.instaclustr.cassandra.ldap.utils.StringUtils;
+
 import org.apache.cassandra.config.DatabaseDescriptor;
 import org.apache.cassandra.db.ConsistencyLevel;
 import org.apache.cassandra.exceptions.AuthenticationException;
@@ -79,7 +86,7 @@ public class LDAPCassandraRoleManager extends CassandraRoleManager
         final String dbaRole = System.getProperty(CASSANDRA_LDAP_ADMIN_USER, "cassandra");
         logger.info("DB admin role is {}", dbaRole);
 
-        final String ldapAdminRole = properties.getProperty(LDAP_DN);
+        final String ldapAdminRole = this.getLdapAdminRole();
         logger.info("LDAP admin role is {}", ldapAdminRole);
 
         try
@@ -149,6 +156,36 @@ public class LDAPCassandraRoleManager extends CassandraRoleManager
         }
     }
 
+    private String getLdapAdminRole()
+    {
+        String ldapAdminRole;
+        
+        String serviceUserDnSecretName = properties.getProperty(LdapAuthenticatorConfiguration.SERVICE_DN_SECRET_NAME);
+        if(serviceUserDnSecretName != null)
+        {
+            serviceUserDnSecretName = StringUtils.stripWhitespacesAndQuotes(serviceUserDnSecretName);
+            String managedIdentityClientId = StringUtils.stripWhitespacesAndQuotes(properties.getProperty(LdapAuthenticatorConfiguration.MANAGED_IDENTITY_CLIENT_ID)); 
+            String keyVaultUrl = StringUtils.stripWhitespacesAndQuotes(properties.getProperty(LdapAuthenticatorConfiguration.KEYVAULT_URL)); 
+
+            ManagedIdentityCredential credential = new ManagedIdentityCredentialBuilder()
+                    .clientId(managedIdentityClientId)
+                    .build();
+
+            SecretClient client = new SecretClientBuilder()
+                .vaultUrl(keyVaultUrl)
+                .credential(credential)
+                .buildClient();
+            
+            ldapAdminRole = SecretUtils.getSecretValue(client, serviceUserDnSecretName);         
+        }
+        else
+        {
+            ldapAdminRole = properties.getProperty(LDAP_DN);            
+        }
+            
+        return ldapAdminRole;
+    }
+    
     @Override
     public Set<Option> supportedOptions()
     {

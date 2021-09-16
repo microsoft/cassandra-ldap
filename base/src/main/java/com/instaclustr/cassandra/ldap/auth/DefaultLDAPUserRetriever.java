@@ -15,7 +15,7 @@ public class DefaultLDAPUserRetriever implements UserRetriever {
     public DefaultLDAPUserRetriever(final Hasher hasher, final Properties properties) {
         this.hasher = hasher;
         this.properties = properties;
-        this.dontLoadService = !Boolean.parseBoolean(properties.getProperty("load_ldap_service", "false"));
+        this.dontLoadService = !Boolean.parseBoolean(properties.getProperty("load_ldap_service", "false").trim());
     }
 
     @Override

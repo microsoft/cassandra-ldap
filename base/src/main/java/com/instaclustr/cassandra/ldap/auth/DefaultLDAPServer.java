@@ -47,25 +47,21 @@ public class DefaultLDAPServer extends LDAPUserRetriever
 
     static class LDAPInitialContext implements AutoCloseable
     {
-        private static final Logger logger = LoggerFactory.getLogger(LDAPInitialContext.class);
+        protected static final Logger logger = LoggerFactory.getLogger(LDAPInitialContext.class);
 
-        private CloseableLdapContext ldapContext;
-        private Properties properties;
-
+        protected CloseableLdapContext ldapContext;
+        protected Properties properties;
+  
         public LDAPInitialContext(final Properties properties)
         {
             this.properties = properties;
 
             final Properties ldapProperties = new Properties();
-
-            final String serviceDN = properties.getProperty(LdapAuthenticatorConfiguration.LDAP_DN);
-            final String servicePass = properties.getProperty(LdapAuthenticatorConfiguration.PASSWORD_KEY);
-
+            
             ldapProperties.put(Context.INITIAL_CONTEXT_FACTORY, properties.getProperty(LdapAuthenticatorConfiguration.CONTEXT_FACTORY_PROP));
             ldapProperties.put(Context.PROVIDER_URL, properties.getProperty(LdapAuthenticatorConfiguration.LDAP_URI_PROP));
-            ldapProperties.put(Context.SECURITY_PRINCIPAL, serviceDN);
-            ldapProperties.put(Context.SECURITY_CREDENTIALS, servicePass);
-
+            this.populateLdapUserInfo(ldapProperties);
+            
             try
             {
                 ldapContext = new CloseableLdapContext(new InitialDirContext(ldapProperties));
@@ -79,9 +75,17 @@ public class DefaultLDAPServer extends LDAPUserRetriever
             }
         }
 
+        public void populateLdapUserInfo(Properties ldapProperties)
+        {
+            final String serviceDN = this.properties.getProperty(LdapAuthenticatorConfiguration.LDAP_DN);
+            final String servicePass = this.properties.getProperty(LdapAuthenticatorConfiguration.PASSWORD_KEY);
+
+            ldapProperties.put(Context.SECURITY_PRINCIPAL, serviceDN);
+            ldapProperties.put(Context.SECURITY_CREDENTIALS, servicePass);
+        }
+        
         public static final class CloseableLdapContext implements AutoCloseable
         {
-
             private final InitialDirContext context;
 
             CloseableLdapContext(final InitialDirContext context)
@@ -179,10 +183,15 @@ public class DefaultLDAPServer extends LDAPUserRetriever
         return this;
     }
 
+    public LDAPInitialContext getLdapContext()
+    {
+        return new LDAPInitialContext(this.properties);
+    }
+    
     @Override
     public User retrieve(User user) throws LDAPAuthFailedException
     {
-        try (final LDAPInitialContext context = new LDAPInitialContext(properties))
+        try (final LDAPInitialContext context = this.getLdapContext())
         {
             final String ldapDn = context.searchLdapDN(user.getUsername());
 

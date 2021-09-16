@@ -49,6 +49,11 @@ public final class LdapAuthenticatorConfiguration
     public static final String LDAP_DN = "service_dn";
     public static final String PASSWORD_KEY = "service_password";
 
+    public static final String SERVICE_DN_SECRET_NAME = "service_dn_secret_name";
+    public static final String SERVICE_PASSWORD_SECRET_NAME = "service_password_secret_name";
+    public static final String MANAGED_IDENTITY_CLIENT_ID = "managed_identity_client_id";
+    public static final String KEYVAULT_URL = "keyvault_url";
+
     public static final String FILTER_TEMPLATE = "filter_template";
 
     public static final String CASSANDRA_AUTH_CACHE_ENABLED_PROP = "auth_cache_enabled";
@@ -120,10 +125,21 @@ public final class LdapAuthenticatorConfiguration
 
         String serviceDN = properties.getProperty(LDAP_DN);
         String servicePass = properties.getProperty(PASSWORD_KEY);
+        String serviceDNSecret = properties.getProperty(SERVICE_DN_SECRET_NAME);
+        String servicePassSecret = properties.getProperty(SERVICE_PASSWORD_SECRET_NAME);
+        String clientId = properties.getProperty(MANAGED_IDENTITY_CLIENT_ID);
+        String keyVaultUrl = properties.getProperty(KEYVAULT_URL);
 
-        if (serviceDN == null || servicePass == null)
+        if ((serviceDN == null || servicePass == null) 
+                && (serviceDNSecret == null || servicePassSecret == null || clientId == null || keyVaultUrl == null))
         {
-            throw new ConfigurationException(format("You must specify both %s and %s.", LDAP_DN, PASSWORD_KEY));
+            throw new ConfigurationException(format("You must specify either %s and %s, or %s, %s, %s and %s", 
+                    LDAP_DN, 
+                    PASSWORD_KEY, 
+                    SERVICE_DN_SECRET_NAME, 
+                    SERVICE_PASSWORD_SECRET_NAME,
+                    MANAGED_IDENTITY_CLIENT_ID,
+                    KEYVAULT_URL));
         }
 
         properties.setProperty(CASSANDRA_AUTH_CACHE_ENABLED_PROP, Boolean.toString(parseBoolean(properties.getProperty(CASSANDRA_AUTH_CACHE_ENABLED_PROP, "true"))));
@@ -138,8 +154,6 @@ public final class LdapAuthenticatorConfiguration
         }
 
         properties.setProperty(FILTER_TEMPLATE, filterTemplate);
-
-
 
         properties.put(LdapAuthenticatorConfiguration.CONTEXT_FACTORY_PROP, properties.getProperty(CONTEXT_FACTORY_PROP, DEFAULT_CONTEXT_FACTORY));
         properties.put(LdapAuthenticatorConfiguration.LDAP_URI_PROP, properties.getProperty(LDAP_URI_PROP));
