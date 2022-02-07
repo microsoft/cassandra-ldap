@@ -16,7 +16,7 @@
         differ where it is necessary -->
 
     <artifactId>cassandra-ldap-base</artifactId>
-    <version>1.1.1</version>
+    <version>1.1.1-v2.1</version>
 
     <name>Cassandra LDAP Authenticator common code</name>
     <description>Common code for Apache Cassandra LDAP plugin</description>
@@ -107,6 +107,12 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.ericsson.bss.cassandra.ecaudit</groupId>
+            <artifactId>ecaudit_c3.11</artifactId>
+            <version>2.7.1</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
