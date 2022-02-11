@@ -36,6 +36,8 @@ import com.instaclustr.cassandra.ldap.auth.DefaultLDAPServer.LDAPInitialContext.
 import com.instaclustr.cassandra.ldap.conf.LdapAuthenticatorConfiguration;
 import com.instaclustr.cassandra.ldap.exception.LDAPAuthFailedException;
 import com.instaclustr.cassandra.ldap.hash.Hasher;
+import com.instaclustr.cassandra.ldap.utils.StringUtils;
+
 import org.apache.cassandra.exceptions.ConfigurationException;
 import org.apache.cassandra.exceptions.ExceptionCode;
 import org.slf4j.Logger;
@@ -215,11 +217,24 @@ public class DefaultLDAPServer extends LDAPUserRetriever
             }
             catch (final NamingException ex)
             {
+                String detailedMsg = "Failed to login. Message: "+ ex.getMessage() 
+                    + ", Code: " + ExceptionCode.BAD_CREDENTIALS.name() 
+                    + ", Reason: " + ex.getCause() 
+                    + ", Stack trace: " + StringUtils.getStackTrace(ex);               
+                logger.error(detailedMsg);
+                
                 throw new LDAPAuthFailedException(ExceptionCode.BAD_CREDENTIALS, ex.getMessage(), ex);
             }
         }
         catch (final Exception ex)
         {
+            String detailedMsg = "Failed to login. Message: " 
+                    + ex.getMessage() 
+                    + ", Code: " + ExceptionCode.UNAUTHORIZED.name() 
+                    + ", Reason: " + ex.getCause() 
+                    + ", Stack trace: " + StringUtils.getStackTrace(ex);
+            logger.error(detailedMsg);
+            
             throw new LDAPAuthFailedException(ExceptionCode.UNAUTHORIZED, "Not possible to login " + user.getUsername(), ex);
         }
     }

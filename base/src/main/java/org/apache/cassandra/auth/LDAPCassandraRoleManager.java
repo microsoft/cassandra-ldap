@@ -129,8 +129,7 @@ public class LDAPCassandraRoleManager extends CassandraRoleManager
                     }
                 } catch (final Exception ex)
                 {
-                    logger.trace("Unable to create LDAP admin role.", ex);
-                    logger.error("Unable to create LDAP admin role {}", ldapAdminRole);
+                    logger.error("Unable to create LDAP admin role {}. Exception: {}", ldapAdminRole, ex);
                     throw ex;
                 }
 
@@ -145,13 +144,13 @@ public class LDAPCassandraRoleManager extends CassandraRoleManager
                     break;
                 } catch (final Exception ex)
                 {
-                    logger.trace("Role manager setup was not successful, sleeping for 5 seconds and trying again ...", ex);
+                    logger.error("Role manager setup was not successful, sleeping for 5 seconds and trying again ...", ex);
                     Uninterruptibles.sleepUninterruptibly(5, TimeUnit.SECONDS);
                 }
             }
         } catch (Exception ex)
         {
-            logger.trace("Unable to setup " + LDAPCassandraRoleManager.class.getName(), ex);
+            logger.error("Unable to setup " + LDAPCassandraRoleManager.class.getName(), ex);
             throw new AuthenticationException("Unable to setup " + LDAPCassandraRoleManager.class.getName() + ": " + ex.getMessage());
         }
     }
