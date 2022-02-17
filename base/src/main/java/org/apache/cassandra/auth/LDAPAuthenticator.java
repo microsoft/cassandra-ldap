@@ -26,7 +26,6 @@ import static java.lang.String.format;
 import java.net.InetAddress;
 import java.util.concurrent.TimeUnit;
 
-import com.ericsson.bss.cassandra.ecaudit.auth.AuditAuthorizer;
 import com.google.common.util.concurrent.UncheckedExecutionException;
 import com.google.common.util.concurrent.Uninterruptibles;
 import com.instaclustr.cassandra.ldap.AbstractLDAPAuthenticator;
@@ -66,15 +65,17 @@ public class LDAPAuthenticator extends AbstractLDAPAuthenticator
 
     protected CacheDelegate cacheDelegate;
 
+    private static final String AuditAuthorizer = "com.ericsson.bss.cassandra.ecaudit.auth.AuditAuthorizer";
+
     public void setup()
     {
         if (!(CassandraAuthorizer.class.isAssignableFrom(DatabaseDescriptor.getAuthorizer().getClass()) ||
-                AuditAuthorizer.class.isAssignableFrom(DatabaseDescriptor.getAuthorizer().getClass())))
+                AuditAuthorizer.equals(DatabaseDescriptor.getAuthorizer().getClass().getCanonicalName())))
         {
             throw new ConfigurationException(format("%s only works with %s and %s",
                                                     LDAPAuthenticator.class.getCanonicalName(),
                                                     CassandraAuthorizer.class.getCanonicalName(),
-                                                    AuditAuthorizer.class.getCanonicalName()));
+                                                    AuditAuthorizer));
         }
 
         clientState = ClientState.forInternalCalls();
