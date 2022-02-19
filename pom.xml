@@ -10,11 +10,14 @@
     
     <modules>
         <module>base</module>
+        <!--  
+        Commenting out the modules that we don't supporting   
         <module>cassandra-2.2</module>
         <module>cassandra-3.0</module>
+        -->
         <module>cassandra-3.11</module>
-        <module>cassandra-4.0</module>
-    </modules>
+        <module>cassandra-4.0</module>  
+ </modules>
     
     <name>Cassandra LDAP Authenticator parent</name>
     <description>Cassadra LDAP plugin parent</description>
@@ -65,9 +68,8 @@
         <nexus.staging.maven.plugin.version>1.6.8</nexus.staging.maven.plugin.version>
         <maven.shade.plugin.version>3.1.1</maven.shade.plugin.version>
         <maven.surefire.plugin>2.22.2</maven.surefire.plugin>
-        <maven.docker.plugin>0.34.1</maven.docker.plugin>
         <maven.build.helper.plugin>3.0.0</maven.build.helper.plugin>
-        <version.jdeb>1.8</version.jdeb>
+        <version.jdeb>1.9</version.jdeb>
         <version.rpm>1.5.0</version.rpm>
         
         <deploy.skip.parent>true</deploy.skip.parent>
@@ -115,16 +117,6 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven.surefire.plugin}</version>
-                <configuration>
-                    <excludes>
-                        <exclude>**/*IntegrationTest</exclude>
-                    </excludes>
-                </configuration>
             </plugin>
         </plugins>
         <pluginManagement>
@@ -226,84 +218,6 @@
     </build>
     
     <profiles>
-        <profile>
-            <id>it</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>io.fabric8</groupId>
-                            <artifactId>docker-maven-plugin</artifactId>
-                            <version>${maven.docker.plugin}</version>
-                            <executions>
-                                <execution>
-                                    <id>container-start</id>
-                                    <phase>pre-integration-test</phase>
-                                    <goals>
-                                        <goal>start</goal>
-                                    </goals>
-                                </execution>
-                                <execution>
-                                    <id>container-stop</id>
-                                    <phase>post-integration-test</phase>
-                                    <goals>
-                                        <goal>stop</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                            <configuration>
-                                <images>
-                                    <image>
-                                        <alias>ldap-it-server</alias>
-                                        <name>osixia/openldap</name>
-                                        <run>
-                                            <env>
-                                                <LDAP_ADMIN_PASSWORD>admin</LDAP_ADMIN_PASSWORD>
-                                            </env>
-                                            <ports>
-                                                <port>127.0.0.1:389:389</port>
-                                            </ports>
-                                            <wait>
-                                                <log>LDAP server is started</log>
-                                                <time>5000</time>
-                                                <tcp>
-                                                    <ports>
-                                                        <port>389</port>
-                                                    </ports>
-                                                </tcp>
-                                            </wait>
-                                        </run>
-                                    </image>
-                                </images>
-                            </configuration>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>${maven.surefire.plugin}</version>
-                        <executions>
-                            <execution>
-                                <phase>integration-test</phase>
-                                <goals>
-                                    <goal>test</goal>
-                                </goals>
-                                <configuration>
-                                    <excludes>
-                                        <exclude>none</exclude>
-                                    </excludes>
-                                    <includes>
-                                        <include>**/*IntegrationTest</include>
-                                    </includes>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
         <!-- Use this profile when releasing. For example: "mvn clean deploy -P release" -->
         <profile>
             <id>release</id>
