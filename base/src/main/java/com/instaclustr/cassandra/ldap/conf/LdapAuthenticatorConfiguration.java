@@ -68,13 +68,15 @@ public final class LdapAuthenticatorConfiguration
     public static final String CONSISTENCY_FOR_ROLE = "consistency_for_role";
     public static final String DEFAULT_CONSISTENCY_FOR_ROLE = "LOCAL_ONE";
 
+    public static final String CONNECTION_TIMEOUT_IN_MS = "connection_timeout_in_ms";
+    public static final String DEFAULT_TIMEOUT = "5000";
+    
     public Properties parseProperties() throws ConfigurationException
     {
         Properties properties = new Properties();
 
         properties.put(Context.SECURITY_AUTHENTICATION, "simple");
         properties.put("com.sun.jndi.ldap.read.timeout", "1000");
-        properties.put("com.sun.jndi.ldap.connect.timeout", "2000");
         properties.put("com.sun.jndi.ldap.connect.pool", "true");
 
         final String cassandraConfEnvProperty = System.getenv().get("CASSANDRA_CONF");
@@ -123,6 +125,10 @@ public final class LdapAuthenticatorConfiguration
                                                     finalLdapPropertyFile.getAbsolutePath()));
         }
 
+        String timeout = properties.getProperty(CONNECTION_TIMEOUT_IN_MS, DEFAULT_TIMEOUT);
+        properties.put("com.sun.jndi.ldap.connect.timeout", timeout);
+        logger.info("LDAP connect timeout configured {}", timeout);
+        
         String serviceDN = properties.getProperty(LDAP_DN);
         String servicePass = properties.getProperty(PASSWORD_KEY);
         String serviceDNSecret = properties.getProperty(SERVICE_DN_SECRET_NAME);
