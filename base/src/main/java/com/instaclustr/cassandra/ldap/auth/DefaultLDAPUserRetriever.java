@@ -1,3 +1,6 @@
+/*
+ * NOTE: This file contains modifications to the original open source code
+ */
 package com.instaclustr.cassandra.ldap.auth;
 
 import java.util.Properties;
