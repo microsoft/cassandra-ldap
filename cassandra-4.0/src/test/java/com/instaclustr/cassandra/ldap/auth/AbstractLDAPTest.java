@@ -139,6 +139,10 @@ public abstract class AbstractLDAPTest {
                                          String dc,
                                          boolean check) {
             try (final Session session = Cluster.builder()
+                    // This is workaround for java.lang.NoClassDefFoundError: com/codahale/metrics/JmxReporter
+                    // as one of the mvn dependencies we add, pulls metrics library >- 4.0, which does not support
+                    // the mentioned class
+                    .withoutJMXReporting()
                     .addContactPoint(point.getHostAddress())
                     .withLoadBalancingPolicy(new DCAwareRoundRobinPolicy.Builder().withLocalDc(dc).build())
                     .withAuthProvider(new PlainTextAuthProvider(username, password))

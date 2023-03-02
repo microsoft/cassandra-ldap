@@ -12,7 +12,7 @@
     <modules>
         <module>base</module>
         <!--  
-        Commenting out the modules that we don't supporting   
+        Commenting out the modules that we don't support  
         <module>cassandra-2.2</module>
         <module>cassandra-3.0</module>
         -->
