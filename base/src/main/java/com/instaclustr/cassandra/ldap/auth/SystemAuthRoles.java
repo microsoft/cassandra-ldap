@@ -10,6 +10,10 @@ public interface SystemAuthRoles {
 
     void createRole(String roleName, boolean superUser);
 
+    default void createRole(String roleName, boolean superUser, String defaultRoleMembership) {
+        createRole(roleName, superUser);
+    }
+
     boolean hasAdminRole(String role);
 
     boolean hasAdminRole();
