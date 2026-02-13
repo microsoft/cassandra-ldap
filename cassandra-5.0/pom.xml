@@ -64,6 +64,43 @@
             </exclusions>
         </dependency>
 
+        <!-- netty-resolver-dns is required by azure-core-http-netty (DnsAddressResolverGroup) -->
+        <!-- Cassandra 5.0 does not ship this module, so it must be bundled in the shade JAR -->
+        <!-- Version must match Cassandra 5.0.6's netty-all version (4.1.119.Final) -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-resolver-dns</artifactId>
+            <version>4.1.119.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-dns</artifactId>
+            <version>4.1.119.Final</version>
+        </dependency>
+        <!-- netty-codec-http2, netty-codec-http, netty-handler-proxy, and netty-codec-socks -->
+        <!-- are required by reactor-netty-http (used by azure-core-http-netty) -->
+        <!-- Cassandra 5.0 does not provide these on the plugin classpath -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http2</artifactId>
+            <version>4.1.119.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-http</artifactId>
+            <version>4.1.119.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-handler-proxy</artifactId>
+            <version>4.1.119.Final</version>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-codec-socks</artifactId>
+            <version>4.1.119.Final</version>
+        </dependency>
+
         <!-- test -->
 
         <dependency>
@@ -149,6 +186,25 @@
                 <version>${maven.shade.plugin.version}</version>
                 <configuration>
                     <finalName>cassandra-ldap-${version.cassandra50}-${project.version}</finalName>
+                    <artifactSet>
+                        <excludes>
+                            <!-- Exclude core io.netty modules provided by Cassandra 5.0 -->
+                            <exclude>io.netty:netty-buffer</exclude>
+                            <exclude>io.netty:netty-codec</exclude>
+                            <exclude>io.netty:netty-common</exclude>
+                            <exclude>io.netty:netty-handler</exclude>
+                            <exclude>io.netty:netty-resolver</exclude>
+                            <exclude>io.netty:netty-transport</exclude>
+                            <exclude>io.netty:netty-transport-classes-epoll</exclude>
+                            <exclude>io.netty:netty-transport-native-epoll</exclude>
+                            <exclude>io.netty:netty-transport-native-unix-common</exclude>
+                            <exclude>io.netty:netty-all</exclude>
+                            <!-- The following netty modules are NOT excluded (bundled in JAR) -->
+                            <!-- because Cassandra 5.0 does not provide them on the plugin classpath: -->
+                            <!-- netty-resolver-dns, netty-codec-dns, netty-codec-http, -->
+                            <!-- netty-codec-http2, netty-handler-proxy, netty-codec-socks -->
+                        </excludes>
+                    </artifactSet>
                 </configuration>
             </plugin>
             <plugin>
