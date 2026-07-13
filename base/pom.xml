@@ -55,6 +55,13 @@
             <groupId>com.azure</groupId>
             <artifactId>azure-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>7.5.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

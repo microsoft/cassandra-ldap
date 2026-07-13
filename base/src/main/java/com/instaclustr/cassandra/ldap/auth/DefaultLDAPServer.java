@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import com.instaclustr.cassandra.ldap.User;
@@ -50,6 +51,43 @@ public class DefaultLDAPServer extends LDAPUserRetriever
 {
     private static final Logger logger = LoggerFactory.getLogger(DefaultLDAPServer.class);
 
+    static final String LDAP_SSL_SOCKET_FACTORY_CLASS = "com.instaclustr.cassandra.ldap.ssl.LdapSSLSocketFactory";
+
+    /**
+     * Routes the LDAP(S) connection through {@link com.instaclustr.cassandra.ldap.ssl.LdapSSLSocketFactory} using the
+     * dedicated LDAP truststore, when configured. Only applies when the provider URL is {@code ldaps://}.
+     * <p>
+     * If no truststore is configured, the environment is left untouched so the connection keeps using the JVM default
+     * (preserving rollback / no-cert behavior). This is the only permitted fallback.
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    static void applyLdapTls(final Map env, final Properties properties)
+    {
+        final String providerUrl = properties.getProperty(LdapAuthenticatorConfiguration.LDAP_URI_PROP);
+
+        if (providerUrl == null || !providerUrl.trim().toLowerCase().startsWith("ldaps://"))
+        {
+            return;
+        }
+
+        final String truststorePath = properties.getProperty(LdapAuthenticatorConfiguration.LDAP_TRUSTSTORE_PROP);
+
+        if (truststorePath == null || truststorePath.trim().isEmpty())
+        {
+            return;
+        }
+
+        final String truststorePassword = properties.getProperty(LdapAuthenticatorConfiguration.LDAP_TRUSTSTORE_PASSWORD_PROP);
+
+        System.setProperty(com.instaclustr.cassandra.ldap.ssl.LdapSSLSocketFactory.TRUSTSTORE_PATH_PROPERTY, truststorePath);
+        if (truststorePassword != null)
+        {
+            System.setProperty(com.instaclustr.cassandra.ldap.ssl.LdapSSLSocketFactory.TRUSTSTORE_PASSWORD_PROPERTY, truststorePassword);
+        }
+
+        env.put("java.naming.ldap.factory.socket", LDAP_SSL_SOCKET_FACTORY_CLASS);
+    }
+
     static class LDAPInitialContext implements AutoCloseable
     {
         protected static final Logger logger = LoggerFactory.getLogger(LDAPInitialContext.class);
@@ -65,6 +103,7 @@ public class DefaultLDAPServer extends LDAPUserRetriever
             
             ldapProperties.put(Context.INITIAL_CONTEXT_FACTORY, properties.getProperty(LdapAuthenticatorConfiguration.CONTEXT_FACTORY_PROP));
             ldapProperties.put(Context.PROVIDER_URL, properties.getProperty(LdapAuthenticatorConfiguration.LDAP_URI_PROP));
+            applyLdapTls(ldapProperties, properties);
             this.populateLdapUserInfo(ldapProperties);
             
             try
@@ -255,6 +294,8 @@ public class DefaultLDAPServer extends LDAPUserRetriever
 
         env.put(Context.SECURITY_PRINCIPAL, username);
         env.put(Context.SECURITY_CREDENTIALS, password);
+
+        applyLdapTls(env, this.properties);
 
         return env;
     }
