@@ -95,7 +95,7 @@ public abstract class AbstractCassandraUserRetriever implements CassandraUserRet
     {
         if (!legacyTableExists)
         {
-            return (SelectStatement) QueryProcessor.getStatement("SELECT salted_hash FROM system_auth.roles WHERE role = ?", clientState).statement;
+            return (SelectStatement) QueryProcessor.getStatement("SELECT salted_hash FROM system_auth.roles WHERE role = ?", clientState);
         } else
         {
             // the statement got prepared, we to try preparing it again.

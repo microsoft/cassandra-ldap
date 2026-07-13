@@ -57,6 +57,10 @@ public final class LdapAuthenticatorConfiguration
     public static final String MANAGED_IDENTITY_CLIENT_ID = "managed_identity_client_id";
     public static final String KEYVAULT_URL = "keyvault_url";
 
+    // Dedicated TLS truststore for the LDAP(S) connection, written by the management sidecar.
+    public static final String LDAP_TRUSTSTORE_PROP = "ldap_truststore";
+    public static final String LDAP_TRUSTSTORE_PASSWORD_PROP = "ldap_truststore_password";
+
     public static final String FILTER_TEMPLATE = "filter_template";
 
     public static final String CASSANDRA_AUTH_CACHE_ENABLED_PROP = "auth_cache_enabled";
